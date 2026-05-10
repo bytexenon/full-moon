@@ -335,16 +335,28 @@ impl Lexer {
             }
 
             initial @ '0' => {
+                let mut number = String::from(initial);
+                if self.lua_version.has_luau() {
+                    while let Some(cur) = self.source.current() {
+                        if cur == '_' {
+                            number.push(cur);
+                            self.source.next();
+                        } else {
+                            break;
+                        }
+                    }
+                }
+
                 if matches!(self.source.current(), Some('x' | 'X')) {
-                    let hex_character = self.source.next().unwrap();
-                    self.read_hex_number(hex_character, start_position)
+                    number.push(self.source.next().unwrap());
+                    self.read_hex_number(number, start_position)
                 } else if (self.lua_version.has_luau() || self.lua_version.has_luajit())
                     && matches!(self.source.current(), Some('b' | 'B'))
                 {
-                    let binary_character = self.source.next().unwrap();
-                    self.read_binary_number(binary_character, start_position)
+                    number.push(self.source.next().unwrap());
+                    self.read_binary_number(number, start_position)
                 } else {
-                    self.read_number(start_position, initial.to_string())
+                    self.read_number(start_position, number)
                 }
             }
 
@@ -1075,10 +1087,10 @@ impl Lexer {
 
     fn read_hex_number(
         &mut self,
-        hex_character: char,
+        mut number: String,
         start_position: Position,
     ) -> Option<LexerResult<Token>> {
-        let mut number = String::from_iter(['0', hex_character]);
+        let prefix_len = number.len();
         let mut hit_decimal = false;
 
         while let Some(next) = self.source.current() {
@@ -1101,7 +1113,7 @@ impl Lexer {
                 }
 
                 'p' | 'P' if self.lua_version.has_lua52() => {
-                    if number.len() == 2 {
+                    if number.len() == prefix_len {
                         return Some(self.eat_invalid_number(start_position, number));
                     }
 
@@ -1116,7 +1128,7 @@ impl Lexer {
             }
         }
 
-        if number.len() == 2 {
+        if number.len() == prefix_len {
             return Some(self.eat_invalid_number(start_position, number));
         }
 
@@ -1130,12 +1142,11 @@ impl Lexer {
 
     fn read_binary_number(
         &mut self,
-        binary_character: char,
+        mut number: String,
         start_position: Position,
     ) -> Option<LexerResult<Token>> {
+        let prefix_len = number.len();
         debug_assert!(self.lua_version.has_luau() || self.lua_version.has_luajit());
-
-        let mut number = String::from_iter(['0', binary_character]);
 
         while let Some(next) = self.source.current() {
             match next {
@@ -1151,7 +1162,7 @@ impl Lexer {
             }
         }
 
-        if number.len() == 2 {
+        if number.len() == prefix_len {
             return Some(self.eat_invalid_number(start_position, number));
         }
 
