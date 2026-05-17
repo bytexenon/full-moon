@@ -702,8 +702,96 @@ input_file: full-moon/tests/roblox_cases/pass/decimal_seperators
     line: 8
     character: 37
   end_position:
-    bytes: 220
+    bytes: 221
     line: 8
     character: 37
+  token_type:
+    type: Whitespace
+    characters: "\n"
+- start_position:
+    bytes: 221
+    line: 9
+    character: 1
+  end_position:
+    bytes: 226
+    line: 9
+    character: 6
+  token_type:
+    type: Symbol
+    symbol: local
+- start_position:
+    bytes: 226
+    line: 9
+    character: 6
+  end_position:
+    bytes: 227
+    line: 9
+    character: 7
+  token_type:
+    type: Whitespace
+    characters: " "
+- start_position:
+    bytes: 227
+    line: 9
+    character: 7
+  end_position:
+    bytes: 231
+    line: 9
+    character: 11
+  token_type:
+    type: Identifier
+    identifier: num9
+- start_position:
+    bytes: 231
+    line: 9
+    character: 11
+  end_position:
+    bytes: 232
+    line: 9
+    character: 12
+  token_type:
+    type: Whitespace
+    characters: " "
+- start_position:
+    bytes: 232
+    line: 9
+    character: 12
+  end_position:
+    bytes: 233
+    line: 9
+    character: 13
+  token_type:
+    type: Symbol
+    symbol: "="
+- start_position:
+    bytes: 233
+    line: 9
+    character: 13
+  end_position:
+    bytes: 234
+    line: 9
+    character: 14
+  token_type:
+    type: Whitespace
+    characters: " "
+- start_position:
+    bytes: 234
+    line: 9
+    character: 14
+  end_position:
+    bytes: 239
+    line: 9
+    character: 19
+  token_type:
+    type: Number
+    text: 1e+_2
+- start_position:
+    bytes: 239
+    line: 9
+    character: 19
+  end_position:
+    bytes: 239
+    line: 9
+    character: 19
   token_type:
     type: Eof

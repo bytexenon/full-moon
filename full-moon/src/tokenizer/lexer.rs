@@ -1052,6 +1052,30 @@ impl Lexer {
         }
     }
 
+    fn read_number_digits<F>(
+        &mut self,
+        number: &mut String,
+        allow_underscores: bool,
+        is_digit: F,
+    ) -> bool
+    where
+        F: Fn(char) -> bool,
+    {
+        let mut saw_digit = false;
+        while let Some(next) = self.source.current() {
+            if is_digit(next) {
+                saw_digit = true;
+                number.push(self.source.next().expect("peeked, but no next"));
+            } else if allow_underscores && next == '_' {
+                number.push(self.source.next().expect("peeked, but no next"));
+            } else {
+                break;
+            }
+        }
+
+        saw_digit
+    }
+
     // Starts from the exponent marker (like 'e')
     fn read_exponent_part(
         &mut self,
@@ -1065,16 +1089,10 @@ impl Lexer {
             number.push(self.source.next().expect("peeked, but no next"));
         }
 
-        if !matches!(self.source.current(), Some('0'..='9')) {
+        if !self.read_number_digits(&mut number, self.lua_version.has_luau(), |next| {
+            next.is_ascii_digit()
+        }) {
             return Some(self.eat_invalid_number(start_position, number));
-        }
-
-        while let Some(next) = self.source.current() {
-            if next.is_ascii_digit() || (self.lua_version.has_luau() && matches!(next, '_')) {
-                number.push(self.source.next().expect("peeked, but no next"));
-            } else {
-                break;
-            }
         }
 
         self.create(
@@ -1090,19 +1108,15 @@ impl Lexer {
         mut number: String,
         start_position: Position,
     ) -> Option<LexerResult<Token>> {
-        let prefix_len = number.len();
         let mut hit_decimal = false;
+        let mut saw_digit = self.read_number_digits(
+            &mut number,
+            self.lua_version.has_luau(),
+            |next| matches!(next, '0'..='9' | 'a'..='f' | 'A'..='F'),
+        );
 
         while let Some(next) = self.source.current() {
             match next {
-                '0'..='9' | 'a'..='f' | 'A'..='F' => {
-                    number.push(self.source.next().expect("peeked, but no next"));
-                }
-
-                '_' if self.lua_version.has_luau() => {
-                    number.push(self.source.next().expect("peeked, but no next"));
-                }
-
                 '.' if self.lua_version.has_lua52() => {
                     if hit_decimal {
                         return Some(self.eat_invalid_number(start_position, number));
@@ -1110,10 +1124,15 @@ impl Lexer {
 
                     hit_decimal = true;
                     number.push(self.source.next().expect("peeked, but no next"));
+                    saw_digit |= self.read_number_digits(
+                        &mut number,
+                        self.lua_version.has_luau(),
+                        |next| matches!(next, '0'..='9' | 'a'..='f' | 'A'..='F'),
+                    );
                 }
 
                 'p' | 'P' if self.lua_version.has_lua52() => {
-                    if number.len() == prefix_len {
+                    if !saw_digit {
                         return Some(self.eat_invalid_number(start_position, number));
                     }
 
@@ -1121,6 +1140,10 @@ impl Lexer {
                 }
 
                 'u' | 'U' | 'l' | 'L' | 'i' | 'I' if self.lua_version.has_luajit() => {
+                    if !saw_digit {
+                        return Some(self.eat_invalid_number(start_position, number));
+                    }
+
                     return self.read_luajit_number_suffix(start_position, number);
                 }
 
@@ -1128,7 +1151,7 @@ impl Lexer {
             }
         }
 
-        if number.len() == prefix_len {
+        if !saw_digit {
             return Some(self.eat_invalid_number(start_position, number));
         }
 
@@ -1145,16 +1168,17 @@ impl Lexer {
         mut number: String,
         start_position: Position,
     ) -> Option<LexerResult<Token>> {
-        let prefix_len = number.len();
         debug_assert!(self.lua_version.has_luau() || self.lua_version.has_luajit());
+        let saw_digit =
+            self.read_number_digits(&mut number, true, |next| matches!(next, '0' | '1'));
 
         while let Some(next) = self.source.current() {
             match next {
-                '0' | '1' | '_' => {
-                    number.push(self.source.next().expect("peeked, but no next"));
-                }
-
                 'u' | 'U' | 'l' | 'L' | 'i' | 'I' if self.lua_version.has_luajit() => {
+                    if !saw_digit {
+                        return Some(self.eat_invalid_number(start_position, number));
+                    }
+
                     return self.read_luajit_number_suffix(start_position, number);
                 }
 
@@ -1162,7 +1186,7 @@ impl Lexer {
             }
         }
 
-        if number.len() == prefix_len {
+        if !saw_digit {
             return Some(self.eat_invalid_number(start_position, number));
         }
 

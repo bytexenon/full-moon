@@ -880,5 +880,116 @@ stmts:
                     token_type:
                       type: Number
                       text: 0_b_1010_1010_1010_1010
+                  trailing_trivia:
+                    - start_position:
+                        bytes: 220
+                        line: 8
+                        character: 37
+                      end_position:
+                        bytes: 221
+                        line: 8
+                        character: 37
+                      token_type:
+                        type: Whitespace
+                        characters: "\n"
+    - ~
+  - - LocalAssignment:
+        local_token:
+          leading_trivia: []
+          token:
+            start_position:
+              bytes: 221
+              line: 9
+              character: 1
+            end_position:
+              bytes: 226
+              line: 9
+              character: 6
+            token_type:
+              type: Symbol
+              symbol: local
+          trailing_trivia:
+            - start_position:
+                bytes: 226
+                line: 9
+                character: 6
+              end_position:
+                bytes: 227
+                line: 9
+                character: 7
+              token_type:
+                type: Whitespace
+                characters: " "
+        name_list:
+          pairs:
+            - End:
+                leading_trivia: []
+                token:
+                  start_position:
+                    bytes: 227
+                    line: 9
+                    character: 7
+                  end_position:
+                    bytes: 231
+                    line: 9
+                    character: 11
+                  token_type:
+                    type: Identifier
+                    identifier: num9
+                trailing_trivia:
+                  - start_position:
+                      bytes: 231
+                      line: 9
+                      character: 11
+                    end_position:
+                      bytes: 232
+                      line: 9
+                      character: 12
+                    token_type:
+                      type: Whitespace
+                      characters: " "
+        equal_token:
+          leading_trivia: []
+          token:
+            start_position:
+              bytes: 232
+              line: 9
+              character: 12
+            end_position:
+              bytes: 233
+              line: 9
+              character: 13
+            token_type:
+              type: Symbol
+              symbol: "="
+          trailing_trivia:
+            - start_position:
+                bytes: 233
+                line: 9
+                character: 13
+              end_position:
+                bytes: 234
+                line: 9
+                character: 14
+              token_type:
+                type: Whitespace
+                characters: " "
+        expr_list:
+          pairs:
+            - End:
+                Number:
+                  leading_trivia: []
+                  token:
+                    start_position:
+                      bytes: 234
+                      line: 9
+                      character: 14
+                    end_position:
+                      bytes: 239
+                      line: 9
+                      character: 19
+                    token_type:
+                      type: Number
+                      text: 1e+_2
                   trailing_trivia: []
     - ~
